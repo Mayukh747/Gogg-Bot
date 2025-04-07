@@ -1,13 +1,18 @@
 import os
+from datetime import timedelta
+
 import discord
 from dotenv import load_dotenv
 import requests
 import json
 import random
 
-sad_words = ["sad", "depressed", "unhappy", "angry", "miserable", "depressing"]
+from poll import moitozoPoll
 
-starter_encouragements = ["Cheer up!", "Hang in there.", "You are a great person / bot!"]
+
+# sad_words = ["sad", "depressed", "unhappy", "angry", "miserable", "depressing"]
+
+# starter_encouragements = ["Cheer up!", "Hang in there.", "You are a great person / bot!"]
 
 def get_quote():
     response = requests.get("https://zenquotes.io/api/random")
@@ -31,13 +36,22 @@ async def on_message(message):
     if message.author == client.user:
         return
 
+    new_poll = discord.Poll
+
     if msg.startswith('wisdom'):
         quote = get_quote()
         await message.channel.send(quote)
-    elif any(word in msg for word in sad_words):
-        await message.channel.send(random.choice(starter_encouragements))
-    elif msg:
-        await message.channel.send('Stay Hard.')
+    # elif any(word in msg for word in sad_words):
+    #     await message.channel.send(random.choice(starter_encouragements))
+    elif msg.startswith('poll'):
+        # r = discord.Poll()
+        # p = discord.Poll(question='sup', duration=timedelta(hours=168))
+        # p.add_answer(text='sup')
+        p = moitozoPoll()
+        await message.channel.send('Stay Hard!', poll=p)
+        # await message.channel.send('What is your favorite food?')
+    # await message.channel.send('Stay Hard.')
+
 
 
 client.run(os.getenv('TOKEN'))
