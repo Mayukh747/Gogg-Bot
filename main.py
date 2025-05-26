@@ -7,12 +7,12 @@ import requests
 import json
 import random
 
-from poll import moitozoPoll
+from MoitozoPoll import MoitozoPoll
 
 
-# sad_words = ["sad", "depressed", "unhappy", "angry", "miserable", "depressing"]
+sad_words = ["sad", "depressed", "unhappy", "angry", "miserable", "depressing"]
 
-# starter_encouragements = ["Cheer up!", "Hang in there.", "You are a great person / bot!"]
+starter_encouragements = ["Sucks to be you.", "Stop being a bitch.", "Stay Hard."]
 
 def get_quote():
     response = requests.get("https://zenquotes.io/api/random")
@@ -41,13 +41,13 @@ async def on_message(message):
     if msg.startswith('wisdom'):
         quote = get_quote()
         await message.channel.send(quote)
-    # elif any(word in msg for word in sad_words):
-    #     await message.channel.send(random.choice(starter_encouragements))
+    elif any(word in msg for word in sad_words):
+         await message.channel.send(random.choice(starter_encouragements))
     elif msg.startswith('poll'):
         # r = discord.Poll()
         # p = discord.Poll(question='sup', duration=timedelta(hours=168))
         # p.add_answer(text='sup')
-        p = moitozoPoll()
+        p = MoitozoPoll()
         await message.channel.send('Stay Hard!', poll=p)
         # await message.channel.send('What is your favorite food?')
     # await message.channel.send('Stay Hard.')

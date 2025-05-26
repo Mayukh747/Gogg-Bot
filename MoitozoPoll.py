@@ -5,16 +5,35 @@ import discord
 from discord import PartialEmoji
 
 
-class moitozoPoll(discord.Poll):
+class MoitozoPoll(discord.Poll):
 
     def __init__(self):
-        super().__init__("Ultimate Frisbee @ Moitozo Park", timedelta(days=7), multiple=True)
+
+
+        #todo: wait, this is bs, I don't need this if I setup the poll at the same day it closes.
+        # Let's just do both setup and teardown on fridays
+        def compute_poll_duration(today: datetime) -> timedelta:
+            # Calculate the number of days until the next Friday (weekday 4)
+            # todo: redundant calculations for 'days_until', is there some kind of calendar
+            #  we can use instead to make this cleaner?
+            days_until_friday = (4 - today.weekday() + 7) % 7
+            if days_until_friday == 0:  # If today is Friday, schedule for next week's Friday
+                days_until_friday = 7
+            next_friday = today + timedelta(days=days_until_friday)
+
+            # Set the time to 6 PM
+            next_friday_6pm = next_friday.replace(hour=18, minute=0, second=0, microsecond=0)
+            return next_friday_6pm - today
+
+        poll_duration = compute_poll_duration(datetime.today())
+        print(poll_duration)
+        super().__init__("Ultimate Frisbee @ Live Oak Park", poll_duration, multiple=True)
         self.generate_poll_answers()
 
     def generate_poll_answers(self) -> None:
 
         def get_next_weekend_dates():
-            today = datetime.today()
+            today = datetime.today() + timedelta(days=2)
 
             # todo: understand the modular arithmetic
             days_until_saturday = (5 - today.weekday()) % 7
@@ -36,9 +55,9 @@ class moitozoPoll(discord.Poll):
                    ("SAT " + sat + ": 11 AM", emojis[0]),
                    ("SAT " + sat + ": 12 PM", emojis[0]),
                    ("SUN " + sun + ": 10 AM", emojis[1]),
-                   ("SUN " + sun + ": 10 AM", emojis[1]),
+                   ("SUN " + sun + ": 11 AM", emojis[1]),
                    ("SUN " + sun + ": 12 PM", emojis[1]),
-                   ("SUN " + sun + ": 9:30 AM Ortega Park", emojis[2]),
+                   ("I may show up for moral support.", emojis[2]),
                    ("I am UNAVAILABLE this weekend.", emojis[3]),
                    ("Not sure. I will update my availability soon.", emojis[3])]
 
