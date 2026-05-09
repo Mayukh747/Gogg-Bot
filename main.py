@@ -112,7 +112,36 @@ async def on_message(message):
                 chunk += line
             if chunk:
                 await message.channel.send(chunk)
+    elif msg.startswith('dist'):
+        channel_name = msg[len('dist'):].strip()
+        target_channel = discord.utils.get(message.guild.channels, name=channel_name)
+        if target_channel is None:
+            await message.channel.send(f'Could not find a channel named {channel_name}.')
+            return
 
+        counts = {}
+        async for m in target_channel.history(limit=None):
+            name = m.author.display_name
+            counts[name] = counts.get(name, 0) + 1
+
+        if not counts:
+            await message.channel.send(f'No messages found in #{channel_name}.')
+        else:
+            sorted_counts = sorted(counts.items(), key=lambda x: x[1], reverse=True)
+            max_name_len = max(len(name) for name, _ in sorted_counts)
+            col_width = max(max_name_len, 4)
+            header = f'Message distribution in #{channel_name}:\n'
+            sep = f'{"─" * col_width}-+-{"─" * 8}\n'
+            title_row = f'{"User":<{col_width}} | {"Messages":>8}\n'
+            chunk = header + title_row + sep
+            for name, count in sorted_counts:
+                line = f'{name:<{col_width}} | {count:>8}\n'
+                if len(chunk) + len(line) > 2000:
+                    await message.channel.send(f'```\n{chunk}```')
+                    chunk = ''
+                chunk += line
+            if chunk:
+                await message.channel.send(f'```\n{chunk}```')
 
 
 client.run(token)
