@@ -84,6 +84,34 @@ async def on_message(message):
                 chunk += line
             if chunk:
                 await message.channel.send(chunk)
+    elif msg.startswith('pull poll results'):
+        planning_channel = discord.utils.get(message.guild.channels, name='session-planning')
+        if planning_channel is None:
+            await message.channel.send('Could not find a channel named session-planning.')
+            return
+
+        poll_messages = []
+        async for m in planning_channel.history(limit=None):
+            if m.poll is not None:
+                poll_messages.append(m)
+
+        if not poll_messages:
+            await message.channel.send('No poll messages found in session-planning.')
+        else:
+            header = 'Poll results in #session-planning:\n'
+            chunk = header
+            for m in poll_messages:
+                date = m.created_at.strftime('%Y-%m-%d %H:%M UTC')
+                question = m.poll.question
+                top_answer = max(m.poll.answers, key=lambda a: a.vote_count, default=None)
+                top_text = f'{top_answer.text} ({top_answer.vote_count} votes)' if top_answer else 'N/A'
+                line = f'- {date} | {question} | Top: {top_text}\n'
+                if len(chunk) + len(line) > 2000:
+                    await message.channel.send(chunk)
+                    chunk = ''
+                chunk += line
+            if chunk:
+                await message.channel.send(chunk)
 
 
 
